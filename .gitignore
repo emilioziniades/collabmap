@@ -1,0 +1,5 @@
+.DS_Store
+auth_token.json
+test.json
+__pycache__/
+

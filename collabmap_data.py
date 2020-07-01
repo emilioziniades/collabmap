@@ -11,8 +11,8 @@ headers = {'Authorization':f'Bearer {current_token}'}
 
 #DOPE ST JUDE EXAMPLE 
 
-dsj_url = 'https://api.spotify.com/v1/artists/6lTiYE2IL4FUqf0CgGjI5i/albums'
-dsj_dict = collabmap.make_collab_dict(dsj_url, artist_name='Medhane'
+dsj_url = 'https://api.spotify.com/v1/artists/7jVv8c5Fj3E9VhNjxT4snq/albums'
+dsj_dict = collabmap.make_collab_dict(dsj_url, artist_name='Lil Nas X'
                                     , headers=headers)
 
 with open('test.json', 'w') as f:
@@ -20,7 +20,6 @@ with open('test.json', 'w') as f:
 
 print('\n')
 pprint(dsj_dict)
-
 
 '''
 TODO

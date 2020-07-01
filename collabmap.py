@@ -8,62 +8,54 @@ from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 
 
-class Decorators():
+def cacheToken(decorated):
+    '''
+    Checks authorization token and refreshes if necessary
+    '''
+    def wrapper():
 
-    @staticmethod
-    def refreshToken(decorated):
-        '''
-        Checks authorization token and refreshes if necessary
+        with open('auth_token.json', 'r') as f:
+            token_data = json.load(f)
 
-        TODO: USE THIS TO DECORATE get_auth_token
-        '''
-        pass
-
-
-def get_auth_token():
-
-    with open('auth_token.json', 'r') as f:
-        token_data = json.load(f)
-  
-    def _token_expired():
-        '''
-        Returns a boolean indicating whether access token has expired
-        '''
         token_expiry = datetime.fromtimestamp(token_data['expires_at'])
         now = datetime.now()
 
-        return token_expiry < now
+        token_expired = (token_expiry < now)
+        
+        if token_expired:
+            #Get new token and update auth_token.json
+            print('Token has expired. Getting new token \n')
+            return decorated()
+        else:
+            #Use existing token
+            print('Using cached token \n')
+            return token_data['access_token']
 
-    def _get_new_token():
-        '''
-        Obtains fresh authorization token from Spotify API via Client Credential
-        Flow and stores token and expiry time as JSON
-        '''
-        CLIENT_ID = '5877586bdfe74c348ef767443058061c'
-        CLIENT_SECRET = '59fcea665e9443059576f1eaf324e47d'
-        AUTH_URL = 'https://accounts.spotify.com/api/token'
+    return wrapper
 
-        client = BackendApplicationClient(client_id=CLIENT_ID)
-        oauth = OAuth2Session(client=client)
-        token = oauth.fetch_token(token_url=AUTH_URL, client_id=CLIENT_ID, 
-                            client_secret=CLIENT_SECRET)
+@cacheToken
+def get_auth_token():
+    '''
+    Obtains fresh authorization token from Spotify API via Client Credential
+    Flow and stores token and expiry time as JSON
+    '''
+    CLIENT_ID = '5877586bdfe74c348ef767443058061c'
+    CLIENT_SECRET = '59fcea665e9443059576f1eaf324e47d'
+    AUTH_URL = 'https://accounts.spotify.com/api/token'
 
-        token_dict = {'access_token': token['access_token'],
-                            'expires_at': token['expires_at']}
+    client = BackendApplicationClient(client_id=CLIENT_ID)
+    oauth = OAuth2Session(client=client)
+    token = oauth.fetch_token(token_url=AUTH_URL, client_id=CLIENT_ID, 
+                        client_secret=CLIENT_SECRET)
 
-        with open('auth_token.json', 'w') as f:
-            json.dump(token_dict, f)
+    token_dict = {'access_token': token['access_token'],
+                        'expires_at': token['expires_at']}
 
-        return token['access_token']
+    with open('auth_token.json', 'w') as f:
+        json.dump(token_dict, f)
 
-    if _token_expired():
-        #Get new token and update auth_token.json
-        print('Token has expired. Getting new token \n')
-        return _get_new_token()
-    else:
-        #Use existing token
-        print('Using cached token \n')
-        return token_data['access_token']
+    return token['access_token']
+
 
 
 def _make_album_dict(artist_url, headers, payload):
@@ -102,6 +94,7 @@ def _count_collaborations(album_url, current_dict, main_artist, headers):
         #Generates list of artists featured on track
         current_artists = []
         for artist in track['artists']:
+            print(artist)
             artist_i = artist['name']
             current_artists.append(artist_i)
 
