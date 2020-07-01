@@ -6,20 +6,42 @@ import requests
 
 import collabmap
 
+#AUTHENTICATION
+
 current_token = collabmap.get_auth_token()
-headers = {'Authorization':f'Bearer {current_token}'}
+token_header = {'Authorization':f'Bearer {current_token}'}
 
-#DOPE ST JUDE EXAMPLE 
+#SEARCH FOR ARTIST
 
-dsj_url = 'https://api.spotify.com/v1/artists/7jVv8c5Fj3E9VhNjxT4snq/albums'
-dsj_dict = collabmap.make_collab_dict(dsj_url, artist_name='Lil Nas X'
-                                    , headers=headers)
+search_phrase= 'Dope Saint Jude'
+
+payload= {'q': search_phrase, 'type': 'artist'}
+search_url= 'https://api.spotify.com/v1/search'
+search = requests.get(search_url, headers=token_header, params=payload)
+search_data = search.json()
+
+first_result = search_data['artists']['items'][0]
+artist_name = first_result['name']
+artist_link = '{}/albums'.format(first_result['href'])
+
+#MAKE DICTIONARY OF COLLABORATIONS WITH MAIN ARTIST
+
+print(f'Now counting collaborations for {artist_name}')
+collab_dict, link_dict = collabmap.make_collab_dict(artist_link, artist_name= artist_name
+                                    , headers=token_header)
+
+#SECOND LAYER OF COLLABORATIONS
+
+for artist, link in link_dict.items():
+
+    print(f'\nNow counting collaborations for {artist}')
+    current_collab_dict, current_link_dict = collabmap.make_collab_dict(link, artist_name= artist, headers=token_header)
+    
+    collab_dict.update(current_collab_dict)
 
 with open('test.json', 'w') as f:
-    json.dump(dsj_dict, f, indent=4)
+    json.dump(collab_dict, f, indent=4)
 
-print('\n')
-pprint(dsj_dict)
 
 '''
 TODO
