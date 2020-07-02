@@ -39,20 +39,19 @@ for artist, collaborators in test_dict.items():
         G.add_edge(artist, collaborator, weight= count*2)
 
 #Position graphs and edges
-position = nx.spring_layout(G, scale= 4, k=0.5, iterations=60)
-
+position = nx.spring_layout(G, scale= 4, k=0.3, iterations=60)
 
 #GRAPH WITH PLOTLY
 
 #Create instance of map
-CM = collabmap.CollabGraph() 
+collabgraph = collabmap.CollabGraph() 
 
 #Create node trace and edge traces
-node_trace = CM.make_node_trace(G, position)
-edge_traces = CM.make_edge_traces(G, position)
+node_trace = collabgraph.make_node_trace(G, position)
+edge_traces = collabgraph.make_edge_traces(G, position)
 
 # Create figure
-fig= go.Figure(layout= CM.layout)
+fig= go.Figure(layout= collabgraph.layout)
 
 # Add all edge traces, and add node trace
 for edge_trace in edge_traces:

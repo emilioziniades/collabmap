@@ -1,5 +1,4 @@
 import json
-from collections import defaultdict
 from pprint import pprint
 
 import requests
@@ -13,18 +12,11 @@ token_header = {'Authorization':f'Bearer {current_token}'}
 
 #SEARCH FOR ARTIST
 
-search_phrase= 'Dope Saint Jude'
+search_prompt = 'Dope Saint Jude'
 
-payload= {'q': search_phrase, 'type': 'artist'}
-search_url= 'https://api.spotify.com/v1/search'
-search = requests.get(search_url, headers=token_header, params=payload)
-search_data = search.json()
+artist_link, artist_name = collabmap.search(search_prompt, token_header)
 
-first_result = search_data['artists']['items'][0]
-artist_name = first_result['name']
-artist_link = '{}/albums'.format(first_result['href'])
-
-#MAKE DICTIONARY OF COLLABORATIONS WITH MAIN ARTIST
+#FIRST LAYER OF COLLABORATIONS
 
 print(f'Now counting collaborations for {artist_name}')
 collab_dict, link_dict = collabmap.make_collab_dict(artist_link, artist_name= artist_name
@@ -32,12 +24,14 @@ collab_dict, link_dict = collabmap.make_collab_dict(artist_link, artist_name= ar
 
 #SECOND LAYER OF COLLABORATIONS
 
-for artist, link in link_dict.items():
+# for artist, link in link_dict.items():
 
-    print(f'\nNow counting collaborations for {artist}')
-    current_collab_dict, current_link_dict = collabmap.make_collab_dict(link, artist_name= artist, headers=token_header)
+#     print(f'\nNow counting collaborations for {artist}')
+#     current_collab_dict, current_link_dict = collabmap.make_collab_dict(link, artist_name= artist, headers=token_header)
     
-    collab_dict.update(current_collab_dict)
+#     collab_dict.update(current_collab_dict)
+
+#SAVE TO FILE 
 
 with open('test.json', 'w') as f:
     json.dump(collab_dict, f, indent=4)
@@ -46,7 +40,6 @@ with open('test.json', 'w') as f:
 '''
 TODO
 
--Handle pagination with lots of results (check 'next' in API result)
--Search queries (search_url = 'https://api.spotify.com/v1/search')
+
 
 '''

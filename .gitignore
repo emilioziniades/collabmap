@@ -1,5 +1,6 @@
 .DS_Store
 auth_token.json
 test.json
+scratchpad.py
 __pycache__/
 

@@ -9,7 +9,7 @@ from oauthlib.oauth2 import BackendApplicationClient
 import plotly.graph_objects as go
 
 
-class CollabGraph():
+class CollabGraph:
 
     def __init__(self):
 
@@ -86,34 +86,48 @@ class CollabGraph():
                            text      = ([text]),
                            mode      = 'lines')
 
+class Decorators:
 
-def cacheToken(decorated):
-    '''
-    Decorator that checks authorization token and refreshes if necessary
-    '''
-    def wrapper():
+    @staticmethod
+    def cacheToken(decorated):
+        '''
+        Decorator that checks authorization token and refreshes if necessary
+        '''
+        def wrapper():
 
-        with open('auth_token.json', 'r') as f:
-            token_data = json.load(f)
+            with open('auth_token.json', 'r') as f:
+                token_data = json.load(f)
 
-        token_expiry = datetime.fromtimestamp(token_data['expires_at'])
-        now = datetime.now()
+            token_expiry = datetime.fromtimestamp(token_data['expires_at'])
+            now = datetime.now()
 
-        token_expired = (token_expiry < now)
-        
-        if token_expired:
-            #Get new token and update auth_token.json
-            print('Token has expired. Getting new token \n')
-            return decorated()
-        else:
-            #Use existing token
-            print('Using cached token \n')
-            return token_data['access_token']
+            token_expired = (token_expiry < now)
+            
+            if token_expired:
+                #Get new token and update auth_token.json
+                print('Token has expired. Getting new token \n')
+                return decorated()
+            else:
+                #Use existing token
+                print('Using cached token \n')
+                return token_data['access_token']
 
-    return wrapper
+        return wrapper
+
+    @staticmethod
+    def checkNext(decorated):
+
+        def wrapper():
+            
+            decorated()
+
+            if 'next' in current_data:
+                print('There is another page of results!')
+
+        return wrapper
 
 
-@cacheToken
+@Decorators.cacheToken
 def get_auth_token():
     '''
     Obtains fresh authorization token from Spotify API via Client Credential
@@ -137,6 +151,20 @@ def get_auth_token():
     return token['access_token']
 
 
+def search(artist_name, token_header):
+
+    payload= {'q': artist_name, 'type': 'artist'}
+    search_url= 'https://api.spotify.com/v1/search'
+    search = requests.get(search_url, headers=token_header, params=payload)
+    search_data = search.json()
+
+    first_result = search_data['artists']['items'][0]
+    artist_name = first_result['name']
+    artist_link = '{}/albums'.format(first_result['href'])
+
+    return artist_link, artist_name
+
+
 def make_collab_dict(artist_url, headers, artist_name):
     '''
     Input: root artist url, auth token in header
@@ -144,10 +172,11 @@ def make_collab_dict(artist_url, headers, artist_name):
 
     Functions used: _make_album_dict, _count_collaborations
     '''
+
     #Make list of all albums from one artist 
     payload = {'limit':'50',
                 'include_groups':'album,single,appears_on'}
-    current_album_dict = _make_album_dict(artist_url, headers=headers, payload=payload)
+    album_dict = _make_album_dict(artist_url, headers=headers, payload=payload)
 
     #Get all collaborations from each album on list
 
@@ -155,7 +184,7 @@ def make_collab_dict(artist_url, headers, artist_name):
     artist_link_dict = {}
 
 
-    for album_name, album_link in current_album_dict.items():
+    for album_name, album_link in album_dict.items():
 
         print(f'Now counting collaborations from {album_name}')
 
@@ -173,21 +202,29 @@ def _make_album_dict(artist_url, headers, payload):
     Input: Artist URL, auth token headers and payload
     Output: Dictionary of the form {album name: album url
     '''
+    album_dict = {}
+    current_data = requests.get(artist_url, headers=headers, params=payload).json()
 
-    r = requests.get(artist_url, headers=headers, params=payload)
-    current_data = r.json()
+    page_count = 1
+    while True:
 
-    current_album_dict = {}
-    for item in current_data['items']:
-        album = item['name']
-        album_link = item['href']
+        #Adding results on current page
+        for item in current_data['items']:
+            album = item['name']
+            album_link = item['href']
+            album_dict[album] = album_link
 
-        current_album_dict[album] = album_link
+        #Check for next page and make new request for that data
+        if current_data['next']:
+            next_url = current_data['next']
+            next_r = requests.get(next_url, headers=headers, params=payload)
+            current_data = next_r.json()
+            page_count += 1
+        else:
+            break
 
-    print(f'NUMBER OF ALBUMS TO COUNT: {len(current_album_dict)}')
-
-    return current_album_dict
-
+    print(f'NUMBER OF ALBUMS TO COUNT: {len(album_dict)} from {page_count} page(s)')
+    return album_dict
 
 def _count_collaborations(album_url, collab_dict, link_dict, main_artist, headers):
     '''
@@ -221,10 +258,11 @@ def _count_collaborations(album_url, collab_dict, link_dict, main_artist, header
                 link_dict[current_artist] = current_artist_link + '/albums'
 
 
-
 '''
 TODO 
 
-Refactor code heectic!
+-Consider restructuring data storage so that collab_dict and link_dict are a single item
+    -Idea: have an artist class that includes their name and link?
+
 
 '''    
