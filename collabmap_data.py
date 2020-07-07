@@ -1,7 +1,5 @@
-import json
+import pickle
 from pprint import pprint
-
-import requests
 
 import collabmap
 
@@ -13,28 +11,40 @@ token_header = {'Authorization':f'Bearer {current_token}'}
 #SEARCH FOR ARTIST
 
 search_prompt = 'Dope Saint Jude'
-
-artist_link, artist_name = collabmap.search(search_prompt, token_header)
+main_artist = collabmap.search(search_prompt, token_header)
 
 #FIRST LAYER OF COLLABORATIONS
 
-print(f'Now counting collaborations for {artist_name}')
-collab_dict, link_dict = collabmap.make_collab_dict(artist_link, artist_name= artist_name
-                                    , headers=token_header)
+print('Now counting collaborations for {}'.format(main_artist.name))
+collab_dict = collabmap.make_collab_dict(main_artist, headers=token_header)
+collab_dict = {main_artist:dict(collab_dict)}
 
 #SECOND LAYER OF COLLABORATIONS
 
-# for artist, link in link_dict.items():
+for artist, collaborators in collab_dict.items():
 
-#     print(f'\nNow counting collaborations for {artist}')
-#     current_collab_dict, current_link_dict = collabmap.make_collab_dict(link, artist_name= artist, headers=token_header)
-    
-#     collab_dict.update(current_collab_dict)
+    for artist1, collaborators1 in collaborators.items():
+
+        print(f'\nNow counting collaborations for {artist1.name} w/link: {artist1.link}')
+        current_collab_dict = collabmap.make_collab_dict(artist1, headers=token_header)
+
+        collab_dict[artist][artist1] = current_collab_dict
+
+pprint(collab_dict)
+
+# for k,v in collab_dict.items():
+#     print(k,v)
+#     for k1, k2 in v.items():
+#         print(k1, k1.parent_collab_count)
+
 
 #SAVE TO FILE 
 
-with open('test.json', 'w') as f:
-    json.dump(collab_dict, f, indent=4)
+with open('collab.pickle', 'wb') as f:
+    pickle.dump(collab_dict, f)
+
+
+######
 
 
 '''

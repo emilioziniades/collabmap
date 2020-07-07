@@ -1,12 +1,22 @@
 import json
 from datetime import datetime
-from collections import defaultdict
-from pprint import pprint
 
 import requests
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 import plotly.graph_objects as go
+
+class Artist:
+
+    def __init__(self, name, link):
+
+        self.name = name
+        self.link = link
+        self.parent_collab_count = 1
+
+    def __str__(self):
+
+        return f'{self.name}'
 
 
 class CollabGraph:
@@ -37,6 +47,7 @@ class CollabGraph:
 
         # For each node, get the position and size and add to the node_trace
         for node in graph.nodes():
+
             x, y = position[node]
             node_trace['x'] += tuple([x])
             node_trace['y'] += tuple([y])
@@ -86,6 +97,7 @@ class CollabGraph:
                            text      = ([text]),
                            mode      = 'lines')
 
+
 class Decorators:
 
     @staticmethod
@@ -111,18 +123,6 @@ class Decorators:
                 #Use existing token
                 print('Using cached token \n')
                 return token_data['access_token']
-
-        return wrapper
-
-    @staticmethod
-    def checkNext(decorated):
-
-        def wrapper():
-            
-            decorated()
-
-            if 'next' in current_data:
-                print('There is another page of results!')
 
         return wrapper
 
@@ -162,12 +162,14 @@ def search(artist_name, token_header):
     artist_name = first_result['name']
     artist_link = '{}/albums'.format(first_result['href'])
 
-    return artist_link, artist_name
+    main_artist_object = Artist(artist_name,artist_link )
+
+    return main_artist_object
 
 
-def make_collab_dict(artist_url, headers, artist_name):
+def make_collab_dict(artist_obj, headers):
     '''
-    Input: root artist url, auth token in header
+    Input: artist (Artist object), auth token in header
     Output: Default dict of the form {collaborator: collaboration count}
 
     Functions used: _make_album_dict, _count_collaborations
@@ -176,25 +178,18 @@ def make_collab_dict(artist_url, headers, artist_name):
     #Make list of all albums from one artist 
     payload = {'limit':'50',
                 'include_groups':'album,single,appears_on'}
-    album_dict = _make_album_dict(artist_url, headers=headers, payload=payload)
+    album_dict = _make_album_dict(artist_obj.link, headers=headers, payload=payload)
 
     #Get all collaborations from each album on list
 
-    collab_defaultdict = defaultdict(lambda: 0)
-    artist_link_dict = {}
-
+    collab_dict = {}
 
     for album_name, album_link in album_dict.items():
 
         print(f'Now counting collaborations from {album_name}')
+        _count_collaborations(album_link, collab_dict, main_artist=artist_obj.name, headers=headers)
 
-        current_link = album_link + '/tracks'
-        _count_collaborations(current_link, collab_defaultdict, artist_link_dict, main_artist=artist_name, headers=headers)
-
-    collab_dict = {}
-    collab_dict[artist_name] = dict(collab_defaultdict)
-
-    return collab_dict, artist_link_dict
+    return collab_dict
 
 
 def _make_album_dict(artist_url, headers, payload):
@@ -211,7 +206,7 @@ def _make_album_dict(artist_url, headers, payload):
         #Adding results on current page
         for item in current_data['items']:
             album = item['name']
-            album_link = item['href']
+            album_link = item['href'] + '/tracks'
             album_dict[album] = album_link
 
         #Check for next page and make new request for that data
@@ -226,14 +221,13 @@ def _make_album_dict(artist_url, headers, payload):
     print(f'NUMBER OF ALBUMS TO COUNT: {len(album_dict)} from {page_count} page(s)')
     return album_dict
 
-def _count_collaborations(album_url, collab_dict, link_dict, main_artist, headers):
+
+def _count_collaborations(album_url, collab_dict, main_artist, headers):
     '''
     For a given album, function adds to pre-existing collaboration dictionary
     '''
     payload  = {'limit':'50'}
-
     r = requests.get(album_url, headers=headers, params=payload)
-
     tracks = r.json()['items']
 
     for track in tracks:
@@ -242,23 +236,46 @@ def _count_collaborations(album_url, collab_dict, link_dict, main_artist, header
         current_artists = {}
         for artist in track['artists']:
             artist_i = artist['name']
-            artist_i_link = artist['href']
+            artist_i_link = artist['href'] + '/albums'
             current_artists[artist_i] = artist_i_link
 
         #If main artist featured, count the others on that song and add to link dict
         if main_artist in current_artists:
             del current_artists[main_artist]
 
-            #Count the collaboration
-            for current_artist in current_artists.keys():
-                collab_dict[current_artist] += 1
-
-            #Add link to link_dict
+            #Count the collaboration and add link to collab_dict
             for current_artist, current_artist_link in current_artists.items():
-                link_dict[current_artist] = current_artist_link + '/albums'
+
+                #if artist already in dictionary: increment its associated value
+                for artist in collab_dict.keys():
+
+                    if current_artist == artist.name:
+                        print('We found the artist already!')
+                        artist.parent_collab_count += 1
+                        break
+
+                else:
+                #else create new artist object and add to collab dict
+                    current_artist_object = Artist(name= current_artist, link= current_artist_link)
+                    collab_dict[current_artist_object] = {}
 
 
-'''
+def recursive_collab_dict(collab_dict, headers, depth=3):
+
+    count= 1
+    for k,v in collab_dict.items():
+
+        if count < depth:
+            print(f'Counting collaborations for: {k}')
+            current_collab_dict = make_collab_dict(v, headers=headers)
+            collab_dict[k] = current_collab_dict
+            #current_collab_dict = make_collab_dict
+            #update existing dict
+            recursive_collab_dict(v)
+        else:            
+            break
+        count += 1
+''' 
 TODO 
 
 -Consider restructuring data storage so that collab_dict and link_dict are a single item
