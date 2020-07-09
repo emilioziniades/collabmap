@@ -61,3 +61,12 @@ for edge_trace in edge_traces:
     fig.add_trace(edge_trace)
 
 fig.show()
+
+
+'''
+TODO
+
+-recursive functions to add edges and nodes
+
+
+'''

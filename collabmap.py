@@ -16,7 +16,11 @@ class Artist:
 
     def __str__(self):
 
-        return f'{self.name}'
+        return self.name
+
+    def __repr__(self):
+
+        return self.name
 
 
 class CollabGraph:
@@ -152,7 +156,9 @@ def get_auth_token():
 
 
 def search(artist_name, token_header):
-
+    '''
+    Searches the Spotify database for an artist named 'artist_name'
+    '''
     payload= {'q': artist_name, 'type': 'artist'}
     search_url= 'https://api.spotify.com/v1/search'
     search = requests.get(search_url, headers=token_header, params=payload)
@@ -167,12 +173,37 @@ def search(artist_name, token_header):
     return main_artist_object
 
 
-def make_collab_dict(artist_obj, headers):
+def make_collab_dict(dictionary, depth, headers, count=1):
+    '''
+    Recursive function that makes a collab_dict of a specified depth
+
+    Input: dictionary with main artist, depth, authentication headers
+
+    Output: Nested collab dictionary
+
+    Functions used: _count_artist_collaborations
+
+    '''
+    if count < depth:
+
+        count += 1
+        for artist,collaborators in dictionary.items():
+
+            print('\nNow counting collaborations for {}'.format(artist.name))
+            current_collab_dict = _count_artist_collaborations(artist, headers)
+            collaborators.update(current_collab_dict)
+
+            make_collab_dict(collaborators, depth, headers, count)
+
+    return dictionary
+
+
+def _count_artist_collaborations(artist_obj, headers):
     '''
     Input: artist (Artist object), auth token in header
     Output: Default dict of the form {collaborator: collaboration count}
 
-    Functions used: _make_album_dict, _count_collaborations
+    Functions used: _make_album_dict, _count_album_collaborations
     '''
 
     #Make list of all albums from one artist 
@@ -181,13 +212,11 @@ def make_collab_dict(artist_obj, headers):
     album_dict = _make_album_dict(artist_obj.link, headers=headers, payload=payload)
 
     #Get all collaborations from each album on list
-
     collab_dict = {}
 
     for album_name, album_link in album_dict.items():
 
-        print(f'Now counting collaborations from {album_name}')
-        _count_collaborations(album_link, collab_dict, main_artist=artist_obj.name, headers=headers)
+        _count_album_collaborations(album_link, collab_dict, main_artist=artist_obj.name, headers=headers)
 
     return collab_dict
 
@@ -218,11 +247,11 @@ def _make_album_dict(artist_url, headers, payload):
         else:
             break
 
-    print(f'NUMBER OF ALBUMS TO COUNT: {len(album_dict)} from {page_count} page(s)')
+    print(f'# of albums to count: {len(album_dict)} from {page_count} page(s)')
     return album_dict
 
 
-def _count_collaborations(album_url, collab_dict, main_artist, headers):
+def _count_album_collaborations(album_url, collab_dict, main_artist, headers):
     '''
     For a given album, function adds to pre-existing collaboration dictionary
     '''
@@ -250,7 +279,6 @@ def _count_collaborations(album_url, collab_dict, main_artist, headers):
                 for artist in collab_dict.keys():
 
                     if current_artist == artist.name:
-                        print('We found the artist already!')
                         artist.parent_collab_count += 1
                         break
 
@@ -260,26 +288,22 @@ def _count_collaborations(album_url, collab_dict, main_artist, headers):
                     collab_dict[current_artist_object] = {}
 
 
-def recursive_collab_dict(collab_dict, headers, depth=3):
 
-    count= 1
-    for k,v in collab_dict.items():
-
-        if count < depth:
-            print(f'Counting collaborations for: {k}')
-            current_collab_dict = make_collab_dict(v, headers=headers)
-            collab_dict[k] = current_collab_dict
-            #current_collab_dict = make_collab_dict
-            #update existing dict
-            recursive_collab_dict(v)
-        else:            
-            break
-        count += 1
 ''' 
 TODO 
 
--Consider restructuring data storage so that collab_dict and link_dict are a single item
-    -Idea: have an artist class that includes their name and link?
+Structural issues
+
+    - refactor code so that all collab_dict functions are within a CDict clas
+    - back edges with deep dicts leads to infinite loop (self.traversed = False)
+
+Code efficiency
+
+    - double counting albums?
+
+Language processing
+
+    - catch errors like 'mavi' and "MAVI" being two different artists
 
 
 '''    
