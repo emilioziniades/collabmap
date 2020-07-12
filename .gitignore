@@ -1,6 +1,6 @@
 .DS_Store
 auth_token.json
-test.json
+Collaboration.pickle
 scratchpad.py
 __pycache__/
 
