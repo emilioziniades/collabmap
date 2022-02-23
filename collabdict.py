@@ -1,5 +1,5 @@
 '''
-Module containing Artist class, CollabDict class, as well as other API related
+Module containing Artist class, self class, as well as other API related
 functions
 '''
 import json
@@ -12,7 +12,7 @@ from oauthlib.oauth2 import BackendApplicationClient
 
 class Artist:
     '''
-    Artist object to be contained in CollabDict nested dictionary
+    Artist object to be contained in self nested dictionary
     '''
 
     def __init__(self, name, link):
@@ -34,7 +34,13 @@ class CollabDict(dict):
     '''
     Dictionary subclass which contains nested dictionaries of artist objects
     '''
-    def make_collab_dict(self, depth, headers):
+    def __init__(self, main_artist='NONE', headers='FAIL',depth=1):
+
+        dict.__init__(self)
+        self.update({main_artist:{}})
+        self.make_collab_dict(headers, depth)
+
+    def make_collab_dict(self, headers, depth):
         '''
         Function that makes a collab_dict of a specified depth recursively
 
@@ -46,7 +52,7 @@ class CollabDict(dict):
         '''
         visited = []
 
-        def rec_collab_dict(self, depth, headers, visited, count=1):
+        def rec_collab_dict(self, headers, depth, visited, count=1):
 
             if count < depth:
 
@@ -55,17 +61,38 @@ class CollabDict(dict):
                     if artist.name not in visited:
                         print('\nNow counting collaborations for {}'.format(artist.name))
                         current_collab_dict = CollabDict._count_artist_collabs(
-                            artist, headers)
+                            artist_obj=artist, headers=headers)
                         collaborators.update(current_collab_dict)
                         visited.append(artist.name)
                     else:
                         print(f'\nSkipping {artist.name} because they have been counted')
 
-                    rec_collab_dict(collaborators, depth, headers, visited, count+1)
+                    rec_collab_dict(collaborators, headers, depth, visited, count+1)
 
             return self
 
-        return rec_collab_dict(self, depth, headers, visited)
+        return rec_collab_dict(self, headers, depth, visited)
+
+    def artist_list(self):
+
+        output = {}
+
+        def rec_flatten(self, output):
+
+            for k,v in self.items():
+
+                current_list = []
+
+                for x in v.keys():
+                    current_list.append(x)
+
+                output[k] = current_list
+
+                rec_flatten(v, output)
+
+        rec_flatten(self, output)
+
+        return list(output.keys())
 
     @staticmethod
     def _count_artist_collabs(artist_obj, headers):
@@ -150,7 +177,8 @@ class CollabDict(dict):
                     #if artist already in dictionary: increment its associated value
                     for artist in collab_dict.keys():
 
-                        if current_artist == artist.name:
+                        if current_artist.lower() == artist.name.lower():
+                            # lower() corrects for same artist with different case
                             artist.parent_collab_count += 1
                             break
 
@@ -233,7 +261,7 @@ TODO
 
 Structural issues
 
-    - refactor code so that all collab_dict functions are within a CDict clas
+
     - Find way to avoid passing headers through every function (globals?)
 
 Code efficiency

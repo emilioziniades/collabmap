@@ -1,10 +1,72 @@
+'''
+Module containing CollabGraph to generate network and associated visualization
+'''
 import plotly.graph_objects as go
 import networkx as nx
 
 
-class CollabGraph():
+class CollabNetwork(nx.Graph):
+    
+    def __init__(self, collab_dict):
+
+        nx.Graph.__init__(self)
+
+        self.collab_dict = collab_dict
+        self._generate_network(self.collab_dict)
+
+    def _generate_network(self, collab_dict):
+
+        #POPULATE GRAPH WITH NODES AND EDGES
+
+        #Add nodes and edges recursively
+        self._make_nodes(collab_dict)
+        self._make_edges(collab_dict)
+
+        #Resize nodes
+        main_artist = list(collab_dict.keys())[0].name
+        self._resize_nodes(main_artist)
+
+
+    def _make_nodes(self, collab_dict):
+
+        for artist, collaborators in collab_dict.items():
+            self.add_node(artist.name)
+            self._make_nodes(collaborators)
+
+
+    def _make_edges(self, collab_dict):
+
+        for artist, collaborators in collab_dict.items():
+            for artist1, collaborators1 in collaborators.items():
+
+                self.add_edge(artist.name, artist1.name, weight=artist1.parent_collab_count)
+                self._make_edges(collaborators)
+
+
+    def _resize_nodes(self, center, scale=5):
+
+        for node in self.nodes():
+
+            current_distance = nx.shortest_path_length(self, center, node)
+            current_size = 1/(current_distance + 1)*14
+
+            self.nodes[node]['size'] = current_size
+
+
+    def position_network(self, parameters):
+
+        #Position graphs and edges
+        return nx.spring_layout(self, 
+                                scale=None,
+                                k=parameters['k'],
+                                iterations=parameters['iterations'])
+
+
+class CollabGraph(go.Figure):
 
     def __init__(self):
+
+        go.Figure.__init__(self)
 
         self.layout = go.Layout(
             paper_bgcolor='rgba(0,0,0,0)',
@@ -15,7 +77,26 @@ class CollabGraph():
             )
 
 
-    def make_node_trace(self, graph, position):
+    def draw_graph(self, network, position, save=False, filename=None):
+
+        # Create node traces, edge traces and add to figure
+        node_trace = self._make_node_trace(network, position)
+        edge_traces = self._make_edge_traces(network, position)
+
+        # Add node trace and add all edge traces
+        self._add_nodes_and_edges_trace(node_trace, edge_traces)
+
+        #TO SEE
+        self.show()
+
+        if save:
+
+            # k = parameters['k']
+            # filename = f'graph_k_{k}'
+            self.write_image(f'graphs/{filename}.png')
+
+
+    def _make_node_trace(self, graph, position):
 
         node_trace = go.Scatter(x=[],
                                 y=[],
@@ -26,6 +107,7 @@ class CollabGraph():
                                 hoverinfo='none',
                                 marker=dict(color=[],
                                             size=[],
+                                            opacity=[],
                                             line=None))
 
         # For each node, get the position and size and add to the node_trace
@@ -35,14 +117,20 @@ class CollabGraph():
             node_trace['x'] += tuple([x])
             node_trace['y'] += tuple([y])
             node_trace['textfont_size'] += tuple([2*graph.nodes[node]['size']])
+
+            marker_size=3*graph.nodes[node]['size']
+            marker_opacity= 1- (1/marker_size)
+
             node_trace['marker']['color'] += tuple(['cornflowerblue'])
-            node_trace['marker']['size'] += tuple([3*graph.nodes[node]['size']])
+            node_trace['marker']['size'] += tuple([marker_size])
+            node_trace['marker']['opacity'] += tuple([marker_opacity])
+            
             node_trace['text'] += tuple(['<b>' + node + '</b>'])
 
         return node_trace
 
 
-    def make_edge_traces(self, graph, position):
+    def _make_edge_traces(self, graph, position):
         '''
         For each edge, make an edge_trace, append to list
 
@@ -82,59 +170,18 @@ class CollabGraph():
                           text=([text]),
                           mode='lines')
 
-    def add_nodes_and_edges_traces(self, node_trace, edge_traces, figure):
 
-        figure.add_trace(node_trace)
+    def _add_nodes_and_edges_trace(self, node_trace, edge_traces):
+
+        self.add_trace(node_trace)
         for edge_trace in edge_traces:
-            figure.add_trace(edge_trace)
+            self.add_trace(edge_trace)
 
-
-def make_nodes(collab_dict, graph):
-
-    for artist, collaborators in collab_dict.items():
-
-        graph.add_node(artist.name)
-        make_nodes(collaborators, graph)
-
-
-def make_edges(collab_dict, graph):
-
-    for artist, collaborators in collab_dict.items():
-        for artist1, collaborators1 in collaborators.items():
-
-            graph.add_edge(artist.name, artist1.name, weight= artist1.parent_collab_count)
-            make_edges(collaborators, graph)
-
-
-def resize_nodes(graph, center, scale=5):
-
-    for node in graph.nodes():
-
-        current_distance = nx.shortest_path_length(graph, center, node)
-        current_size = 1/(current_distance+ 1)*14
-
-        graph.nodes[node]['size'] = current_size
-
-
-
-
-
-
+    
 ''' 
 TODO 
 
-Structural issues
-
-    - refactor code so that all collab_dict functions are within a CDict clas
-    - Find way to avoid passing headers through every function (globals?)
-
-Code efficiency
-
-    - double counting albums?
-
-Language processing
-
-    - catch errors like 'mavi' and "MAVI" being two different artists
+-Opacity is off
 
 
 '''    
