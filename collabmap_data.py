@@ -10,7 +10,7 @@ import requests_cache
 import collabdict
 
 #Cache set on 14 July 2020
-requests_cache.install_cache('collabcache')
+requests_cache.install_cache('data/collabcache')
 
 #AUTHENTICATION
 
@@ -19,7 +19,7 @@ token_header = {'Authorization':f'Bearer {current_token}'}
 
 #SEARCH FOR ARTIST
 
-search_prompt = 'Kanye West'
+search_prompt = 'Dope Saint Jude'
 main_artist = collabdict.search(search_prompt, token_header)
 print(main_artist)
 
@@ -44,7 +44,7 @@ case-difference:
 
 #SAVE TO FILE 
 
-with open('collab.pickle', 'wb') as f:
+with open('data/collab.pickle', 'wb') as f:
     pickle.dump(collab_dict, f)
 
 '''

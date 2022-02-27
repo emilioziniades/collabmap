@@ -3,5 +3,5 @@ auth_token.json
 Collaboration.pickle
 scratchpad.py
 __pycache__/
-graphs/
-
+data/*
+.env
