@@ -32,7 +32,7 @@ def main():
     # CREATE GRAPH OBJECT WITH NETWORKX AND GRAPH WITH PLOTLY
 
     collab_network = collabgraph.CollabNetwork(collab_dict)
-    parameters = {"iterations": 100, "k": None}
+    parameters = {"iterations": 50, "k": 0.55}
     position = collab_network.position_network(parameters)
     collab_graph = collabgraph.CollabGraph()
     collab_graph.draw_graph(collab_network, position, save, f"{artist}-{depth}")

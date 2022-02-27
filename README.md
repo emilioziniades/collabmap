@@ -1,5 +1,7 @@
 # CollabMap
 
+![Example CollabMap](DEMO.png "Example CollabMap for artist Parabyl")
+
 ## Summary 
 
 When two artists collaborate together on a song, they are making an implicit agreement that their styles overlap in some way, or at least that they enjoy their peer's music enough to be willing to work together on a new song. CollabMap takes this basic unit of a collaboration, and attempts to systematize the relationship between artists based on who they have collaborated with. Beyond providing data to further enabling research of the music industry, this tool can help you discover new music by answering a series of simple question: who does your favourite artist collaborate with the most? And who do those artist collaborate with the most? And so on.
