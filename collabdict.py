@@ -210,6 +210,9 @@ def cache_token(decorated):
 
     def wrapper():
 
+        if not os.path.exists("data"):
+            os.mkdir("data")
+
         try:
             with open("data/auth_token.json", "r") as file:
                 token_data = json.load(file)
@@ -265,34 +268,21 @@ def search(artist_name, token_header):
     """
     Searches the Spotify database for an artist named 'artist_name'
     """
+
+    print(f"Searching Spotify database for {artist_name}")
     payload = {"q": artist_name, "type": "artist"}
     search_url = "https://api.spotify.com/v1/search"
     search_req = requests.get(search_url, headers=token_header, params=payload)
     search_data = search_req.json()
+    artists = search_data["artists"]["items"]
 
-    first_result = search_data["artists"]["items"][0]
-    artist_name = first_result["name"]
-    artist_link = "{}/albums".format(first_result["href"])
+    if len(artists) == 0:
+        print(f"Artist {artist_name} not found, exiting")
+        exit(1)
+
+    artist_name = artists[0]["name"]
+    artist_link = f"{artists[0]['href']}/albums"
 
     main_artist_object = Artist(artist_name, artist_link)
 
     return main_artist_object
-
-
-""" 
-TODO 
-
-Structural issues
-
-
-    - Find way to avoid passing headers through every function (globals?)
-
-Code efficiency
-
-    - double counting albums?
-
-Language processing
-
-    - catch errors like 'mavi' and "MAVI" being two different artists
-
-"""

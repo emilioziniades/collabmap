@@ -1,6 +1,9 @@
 """
 Module containing CollabGraph to generate network and associated visualization
 """
+
+import os
+
 import plotly.graph_objects as go
 import networkx as nx
 
@@ -52,7 +55,8 @@ class CollabNetwork(nx.Graph):
 
     def position_network(self, parameters):
 
-        # Position graphs and edges
+        # Position nodes and edges
+
         return nx.spring_layout(
             self, scale=None, k=parameters["k"], iterations=parameters["iterations"]
         )
@@ -84,10 +88,9 @@ class CollabGraph(go.Figure):
         self.show()
 
         if save:
-
-            # k = parameters['k']
-            # filename = f'graph_k_{k}'
-            self.write_image(f"graphs/{filename}.png")
+            if not os.path.exists("data"):
+                os.mkdir("data")
+            self.write_image(f"data/{filename}.png")
 
     def _make_node_trace(self, graph, position):
 
