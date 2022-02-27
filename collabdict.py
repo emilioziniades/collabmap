@@ -165,6 +165,11 @@ class CollabDict(dict):
         """
         payload = {"limit": "50"}
         req = requests.get(album_url, headers=headers, params=payload)
+
+        if req.status_code != 200:
+            print(f"get request failed with status code {req.status_code}")
+            exit(1)
+
         tracks = req.json()["items"]
 
         for track in tracks:
