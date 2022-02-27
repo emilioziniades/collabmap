@@ -65,9 +65,9 @@ Once the process is done, a browser window should open with the graph of collabo
 
 This project was initially part of my journey to learn Python. I had a lot of fun doing it, but it is certainly nowhere near complete. Here are a few features that I may implement if I have some free time in the future.
 
-- [] Create a simple front-end website with a search box that displays the graphs and provides the option to save the graphs as images.
-- [] Tweak the visual appearance of the graphs, either by improving the positioning algorithm or by simply changing colours and label settings.
-- [] Provide the option to prune graphs and keep only edges between nodes which have 2 or more collaborations.
+- [ ] Create a simple front-end website with a search box that displays the graphs and provides the option to save the graphs as images.
+- [ ] Tweak the visual appearance of the graphs, either by improving the positioning algorithm or by simply changing colours and label settings.
+- [ ] Provide the option to prune graphs and keep only edges between nodes which have 2 or more collaborations.
 
 
 ## Collaboration
