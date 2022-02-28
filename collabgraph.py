@@ -68,8 +68,8 @@ class CollabGraph(go.Figure):
         go.Figure.__init__(self)
 
         self.layout = go.Layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(255,255,255,1)",
+            plot_bgcolor="rgba(255,255,255,1)",
             xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
             yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
             showlegend=False,
@@ -90,7 +90,7 @@ class CollabGraph(go.Figure):
         if save:
             if not os.path.exists("data"):
                 os.mkdir("data")
-            self.write_image(f"data/{filename}.png")
+            self.write_image(f"data/{filename}.png", width=1200, height=750, scale=1.5)
 
     def _make_node_trace(self, graph, position):
 
