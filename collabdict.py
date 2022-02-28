@@ -213,13 +213,13 @@ def cache_token(decorated):
         if not os.path.exists("data"):
             os.mkdir("data")
 
-        try:
-            with open("data/auth_token.json", "r") as file:
-                token_data = json.load(file)
-        except FileNotFoundError:
+        if not os.path.exists("data/auth_token.json"):
             # Initialize auth_token.json file
             print("No token found. Getting token.")
             return decorated()
+
+        with open("data/auth_token.json", "r") as file:
+            token_data = json.load(file)
 
         token_expiry = datetime.fromtimestamp(token_data["expires_at"])
 
@@ -245,6 +245,11 @@ def get_auth_token():
     load_dotenv()
     client_id = os.getenv("CLIENT_ID")
     client_secret = os.getenv("CLIENT_SECRET")
+    if client_id is None or client_secret is None:
+        print(
+            "Client ID and secret not configured properly. Please see instructions in README"
+        )
+        exit(1)
     auth_url = "https://accounts.spotify.com/api/token"
 
     client = BackendApplicationClient(client_id=client_id)
