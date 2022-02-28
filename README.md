@@ -4,7 +4,7 @@
 
 ## Summary 
 
-When two artists collaborate together on a song, they are making an implicit agreement that their styles overlap in some way, or at least that they enjoy their peer's music enough to be willing to work together on a new song. CollabMap takes this basic unit of a collaboration, and attempts to systematize the relationship between artists based on who they have collaborated with. Beyond providing data to further enabling research of the music industry, this tool can help you discover new music by answering a series of simple question: who does your favourite artist collaborate with the most? And who do those artist collaborate with the most? And so on.
+When two artists collaborate together on a song, they are making an implicit agreement that their styles overlap in some way, or at least that they enjoy their peer's music enough to be willing to work together on a new song. CollabMap takes this basic unit of a collaboration, and attempts to systematize the relationship between artists based on who they have collaborated with. Beyond providing data to further enable research of the music industry, this tool can help you discover new music by answering a series of simple question: who does your favourite artist collaborate with the most? And who do those artist collaborate with the most? And so on.
 
 CollabMap is a Python project which generates graphs whose nodes are artists, and whose edges represent the number of times those two artists have collaborated together. Data is collected using the Spotify API. Requests are cached into the `data` directory to limit the number of API calls. NetworkX and Plotly are used to generate the graph and represent it visually.
 
@@ -32,7 +32,7 @@ CLIENT_SECRET=def456...
 
 ## Usage
 
-After following the instructions above, you should be able to run collabmap.py. It is used as follows,
+After following the instructions above, you should be able to run `collabmap.py`. It is used as follows,
 
 ```
 python collabmap.py [-h] [--depth D] [--save] artist
