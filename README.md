@@ -1,10 +1,11 @@
 # CollabMap
 
 ![Example CollabMap](DEMO.png "Example CollabMap for artist Parabyl")
+*CollabMap at depth 3 for [Parabyl](https://open.spotify.com/artist/6RhLS4l1XlQMBME2Ox0t2D)*
 
 ## Summary 
 
-When two artists collaborate together on a song, they are making an implicit agreement that their styles overlap in some way, or at least that they enjoy their peer's music enough to be willing to work together on a new song. CollabMap takes this basic unit of a collaboration, and attempts to systematize the relationship between artists based on who they have collaborated with. Beyond providing data to further enable research of the music industry, this tool can help you discover new music by answering a series of simple question: who does your favourite artist collaborate with the most? And who do those artist collaborate with the most? And so on.
+When two artists collaborate together on a song, they are making an implicit agreement that their styles overlap in some way, or at least that they enjoy each other's music enough to be willing to work together on a song. CollabMap takes this basic unit of a collaboration, and attempts to systematize the relationship between artists based on who they have collaborated with. Beyond being a tool to generate data useful for research of the music industry, this tool can also help you discover new music by answering a series of simple question: who does your favourite artist collaborate with the most? And who do those artist collaborate with the most? And so on.
 
 CollabMap is a Python project which generates graphs whose nodes are artists, and whose edges represent the number of times those two artists have collaborated together. Data is collected using the Spotify API. Requests are cached into the `data` directory to limit the number of API calls. NetworkX and Plotly are used to generate the graph and represent it visually.
 
@@ -67,7 +68,7 @@ Once the process is done, a browser window should open with the graph of collabo
 
 This project was initially part of my journey to learn Python. I had a lot of fun doing it, but it is certainly nowhere near complete. Here are a few features that I may implement if I have some free time in the future.
 
-- [ ] Create a simple front-end website with a search box that displays the graphs and provides the option to save the graphs as images.
+- [ ] Create a simple front-end site with a search box that displays the graphs and provides the option to save the graphs as images.
 - [ ] Tweak the visual appearance of the graphs, either by improving the positioning algorithm or by simply changing colours and label settings.
 - [ ] Provide the option to prune graphs and keep only edges between nodes which have 2 or more collaborations.
 
