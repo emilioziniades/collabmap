@@ -1,7 +1,7 @@
 # CollabMap
 
 ![Example CollabMap](DEMO.png "Example CollabMap for artist Parabyl")
-*CollabMap at depth 3 for [Parabyl](https://open.spotify.com/artist/6RhLS4l1XlQMBME2Ox0t2D)*
+*CollabMap for [Parabyl](https://open.spotify.com/artist/6RhLS4l1XlQMBME2Ox0t2D) (depth = 3)*
 
 ## Summary 
 
