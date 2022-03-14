@@ -1,9 +1,9 @@
 # CollabMap
 
-![Example CollabMap](DEMO.png "Example CollabMap for artist Parabyl")
-*CollabMap for [Parabyl](https://open.spotify.com/artist/6RhLS4l1XlQMBME2Ox0t2D) (depth = 3)*
+![Example CollabMap](.github/DEMO.png "Example CollabMap for artist Parabyl")
+_CollabMap for [Parabyl](https://open.spotify.com/artist/6RhLS4l1XlQMBME2Ox0t2D) (depth = 3)_
 
-## Summary 
+## Summary
 
 When two artists collaborate together on a song, they are making an implicit agreement that their styles overlap in some way, or at least that they enjoy each other's music enough to be willing to work together on a song. CollabMap takes this basic unit of a collaboration, and attempts to systematize the relationship between artists based on who they have collaborated with. Beyond being a tool to generate data useful for research of the music industry, this tool can also help you discover new music by answering a series of simple question: who does your favourite artist collaborate with the most? And who do those artist collaborate with the most? And so on.
 
@@ -11,7 +11,7 @@ CollabMap is a Python project which generates graphs whose nodes are artists, an
 
 In terms of the project's structure, the main file is `collabmap.py`, which is invoked with command-line arguments. See usage section below. `collabdict.py` and `collabgraph.py` contain classes for the dictionary, graph and plot used by `collabmap.py`, as well as some other helper functions related to making API calls and managing access tokens.
 
-## Installation 
+## Installation
 
 ### Clone and install dependencies
 
@@ -40,6 +40,7 @@ python collabmap.py [-h] [--depth D] [--save] artist
 ```
 
 To view all the arguments and their purpose,
+
 ```console
 emilio@MBP:~$ python collabmap.py -h
 ```
@@ -71,7 +72,6 @@ This project was initially part of my journey to learn Python. I had a lot of fu
 - [ ] Create a simple front-end site with a search box that displays the graphs and provides the option to save the graphs as images.
 - [ ] Tweak the visual appearance of the graphs, either by improving the positioning algorithm or by simply changing colours and label settings.
 - [ ] Provide the option to prune graphs and keep only edges between nodes which have 2 or more collaborations.
-
 
 ## Collaboration
 

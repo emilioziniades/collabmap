@@ -5,3 +5,4 @@ scratchpad.py
 __pycache__/
 data/*
 .env
+tags
